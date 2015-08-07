@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+{% load url from future %}
+
+{% block content %}
+    {% if error %}
+      <div class="alert alert-error">
+        <ul>
+            <li>{{ error }}</li>
+        </ul>
+      </div>
+    {% endif %}
+
+    {% block delete_form %}
+      <form action="{% url 'admin:return_from_collect' product_id %}" method="GET">{% csrf_token %}
+        <div class="alert alert-block alert-info">
+          <h4 class="alert-heading">Создание новых правил</h4>
+
+            {% if created_rules|length %}
+                <p>
+                    Были созданы следующие правила
+                </p>
+                <ul>
+                {% for rule in created_rules %}
+                    <li><a href="{% url 'admin:core_productrule_change' rule.id %}">{{ forloop.counter }}. {{ rule.name }}</a></li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>
+                    Нет новых правил для создания
+                </p>
+            {% endif %}
+          <br>
+
+          <div>
+            <input type="submit" value="Вернуться к продукту" class="btn btn-info"/>
+          </div>
+        </div>
+      </form>
+    {% endblock %}
+
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "admin/base.html" %}
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+
+{% block title %}{{ title }} |M-proxy{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">M-proxy</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="inner-two-columns" id="content-main">
+    <form class="form-horizontal" id="productrule_form" method="get" action="" enctype="multipart/form-data">
+      <div class="inner-right-column" style="top: 10px;">
+        <div class="box save-box">
+            <div class="submit-row clearfix">
+              <button class="btn btn-high btn-info" id="start-collect" >Начать</button>
+              <button class=" btn btn-high" id="clear-collect">Очистить буфер</button>
+              <button class=" btn btn-high disabled" id="stop-collect">Остановить</button>
+              <button class="btn btn-high disabled" id="create-rule">Создать правила</button>
+              <button class="btn btn-high" id="return">Вернуться к продукту</button>
+            </div>
+        </div>
+      </div>
+      <div class="inner-center-column">
+        <div class="tab-content tab-content-main">
+            <fieldset class="module aligned with-legend ">
+                <h2 class="legend">Отслеживание и сохранение правила</h2>
+                <div class="control-group form-row field-imitate_headers ">
+                    <div><div class="control-label"><label for="id_imitate_headers">Состояние прослушивания:</label></div><div class="controls"><textarea style="width: 99%" readonly="readonly" rows="12" name="track_monitor" id="track_monitor" cols="100">----</textarea></div></div>
+                </div>
+            </fieldset>
+        </div>
+
+        <script type="text/javascript">
+            $(on_change_fix);
+
+            function on_change_fix(){
+                $('#start-collect').click(start_collect)
+                $('#stop-collect').click(stop_collect)
+                $('#clear-collect').click(clear_collect)
+                $('#create-rule').click(make_rules)
+                $('#return').click(return_from_collect)
+            }
+
+            var intervalId = null
+            function load() {
+                 var request = $.ajax({
+                      url: "{% url 'admin:collector_collect' product_id %}",
+                      type: "GET",
+                      dataType: "json"
+                    });
+
+                    request.done(function(jsnVal) {
+                        if (jsnVal.status) {
+                            $('#track_monitor').val(jsnVal.text_response);
+                        }
+                    });
+
+                    request.fail(function( jqXHR, textStatus ) {
+                      alert( "Request failed: " + textStatus );
+                    });
+            }
+
+            function start_collect() {
+                if ($(this).hasClass('disabled')) {
+                    return false
+                }
+
+                var request = $.ajax({
+                      url: "{% url 'admin:collector_start' product_id %}",
+                      type: "GET",
+                      dataType: "json"
+                    });
+
+                    request.done(function( msg ) {
+                        intervalId = setInterval(load, 2000);
+                        $('#start-collect').addClass('disabled');
+                        $('#return').addClass('disabled');
+                        $('#create-rule').addClass('disabled');
+                        $('#stop-collect').removeClass('disabled');
+                    });
+
+                    request.fail(function( jqXHR, textStatus ) {
+                      alert( "Request failed: " + textStatus );
+                    });
+                return false
+            }
+
+            function stop_collect() {
+                if ($(this).hasClass('disabled')) {
+                    return false
+                }
+
+                var request = $.ajax({
+                      url: "{% url 'admin:collector_stop' product_id %}",
+                      type: "GET",
+                      dataType: "json"
+                    });
+
+                    request.done(function( msg ) {
+                        clearInterval(intervalId);
+                        $('#start-collect').removeClass('disabled')
+                        $('#return').removeClass('disabled')
+                        $('#create-rule').removeClass('disabled')
+                        $('#stop-collect').addClass('disabled')
+                        $('#refresh-collect').addClass('disabled')
+                    });
+
+                    request.fail(function( jqXHR, textStatus ) {
+                      alert( "Request failed: " + textStatus );
+                    });
+
+                return false
+            }
+
+            function clear_collect() {
+                if ($(this).hasClass('disabled')) {
+                    return false
+                }
+
+                var request = $.ajax({
+                      url: "{% url 'admin:collector_clear' product_id %}",
+                      type: "GET",
+                      dataType: "json"
+                    });
+
+                    request.done(function( msg ) {
+                        $('#track_monitor').val('');
+                    });
+
+                    request.fail(function( jqXHR, textStatus ) {
+                      alert( "Request failed: " + textStatus );
+                    });
+
+                return false
+            }
+
+            function make_rules() {
+                if ($(this).hasClass('disabled')) {
+                    return false
+                }
+
+                window.location.replace("{% url 'admin:collector_make_rules' product_id %}");
+                return false
+            }
+
+            function return_from_collect() {
+                if ($(this).hasClass('disabled')) {
+                    return false
+                }
+
+                window.location.replace("{% url 'admin:return_from_collect' product_id %}");
+                return false
+            }
+
+        </script>
+      </div>
+    </form>
+  </div>
+
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

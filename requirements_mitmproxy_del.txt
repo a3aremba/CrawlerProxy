@@ -1,0 +1,9 @@
+mitcproxy
+urwid
+pyasn1
+tornado
+lxml
+pyOpenSSL
+Pillow
+configargparse
+netlib

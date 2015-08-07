@@ -1,0 +1,3 @@
+; environment type = production | development |
+[Environment]
+environment_type = production
